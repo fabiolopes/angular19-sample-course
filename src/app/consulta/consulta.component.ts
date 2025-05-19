@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
 import { ClienteService } from '../services/cliente.service';
 import { Cliente } from '../cadastro/cliente';
@@ -26,7 +27,7 @@ import { Router } from '@angular/router';
   styleUrl: './consulta.component.scss'
 })
 export class ConsultaComponent implements OnInit {
-
+  private snackBar = inject(MatSnackBar);
   nomeBusca = "";
   clientes: Cliente[] = [];
   colunasTable = ['id', 'nome', 'cpf', 'dataNascimento', 'email', 'acoes'];
@@ -55,6 +56,7 @@ export class ConsultaComponent implements OnInit {
   deletar(cliente: Cliente) {
     this.clienteService.deletar(cliente);
     this.clientes = this.clienteService.pesquisarClientes("");
+    this.snackBar.open("Cliente deletado com sucesso!", "OK");
   }
 
 }
