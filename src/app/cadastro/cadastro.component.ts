@@ -13,6 +13,9 @@ import { v4 as uuid } from 'uuid';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { NgxMaskDirective, provideNgxMask } from 'ngx-mask'
+import { BrasilapiService } from '../services/brasilapi.service';
+import { Estado, Municipio } from '../models/brasilapi.model';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-cadastro',
@@ -25,7 +28,8 @@ import { NgxMaskDirective, provideNgxMask } from 'ngx-mask'
     MatIconModule, 
     MatButtonModule, 
     CommonModule,
-    NgxMaskDirective
+    NgxMaskDirective,
+    MatSelectModule
 
   ],
   providers: [
@@ -38,11 +42,14 @@ export class CadastroComponent implements OnInit {
   private snackBar = inject(MatSnackBar);
   cliente: Cliente = Cliente.newCliente();
   atualizando = false;
+  estados: Estado[] = [];
+  municipios: Municipio [] = [];
 
   constructor(
     private clienteService: ClienteService, 
     private activatedRoute: ActivatedRoute,
-    private route: Router
+    private route: Router,
+    private brasilApiService: BrasilapiService
   ) {}
 
   ngOnInit(): void {
@@ -52,9 +59,11 @@ export class CadastroComponent implements OnInit {
         if(cliente) {
           this.cliente = cliente;
           this.atualizando = true;
+          this.carregarMunicipios();
         }
       }
     });
+    this.carregarUFs();
   }
 
   salvar() {
@@ -71,5 +80,28 @@ export class CadastroComponent implements OnInit {
 
   mostrarMensagem(mensagem: string) {
     this.snackBar.open(mensagem, 'Ok');
+  }
+
+  carregarUFs() {
+    this.brasilApiService.listarUFs().subscribe( {
+      next: listaEstados => {
+        this.estados = listaEstados;
+        this.estados.sort((a, b) => a.nome.localeCompare(b.nome));
+      },
+      error: erro => {
+        console.log(erro);
+      }
+    });
+  }
+
+  carregarMunicipios() {
+    this.brasilApiService.getMunicipiosPorUF(this.cliente.estado).subscribe({
+      next: municipios => {
+        this.municipios = municipios;
+      },
+      error: erro => {
+        console.log(erro);
+      }
+    });
   }
 }
